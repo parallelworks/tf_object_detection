@@ -1,0 +1,35 @@
+<tool id='demoworkflows_julia_parallel_co' name='demoworkflows_julia_parallel_co'>
+  <command interpreter='parsl'>main.py</command>
+  <inputs>
+        <conditional name="data_source_cond">
+            <param name='data_source' type='select' label='Select data source' width='50%_none' optional='false' multiple='false'>
+            <option value="vcinity_nfs" selected="true">Vcinity NFS</option>
+            <option value="direct_nfs">Direct NFS</option>
+            <option value="gcp_bucket">GCP bucket</option>
+        </param>
+        <when value="vcinity_nfs">
+            <param name='mount_ip' label='NFS IP address' type='text' value='54.241.247.242' width='52%' optional='true'></param>
+            <param name='pw_mount_dir' label='Absolute path to PW mounted directory' type='text' value='/pw/storage/vcinity_nfs_aws/' width='52%' optional='true'></param>
+            <param name='worker_mount_dir' label='Absolute path to worker mounted directory' type='text' value='/mnt/vcinity_nfs_aws/' width='52%' optional='true'></param>
+            <param name='imgdirs' label='Relative path to image directories' type='text' help='Relative from the mounted directory. Separate multiple paths using ---' value='images/n01440764---images/n01443537---images/n01443537---images/n01484850---images/n01491361---images/n01494475---images/n01496331---images/n01498041---images/n01514668---images/n01514859---images/n01518878---images/n01530575---images/n01531178---images/n01532829---images/n01534433---images/n01537544---images/n01558993---images/n01560419---images/n01580077---images/n01582220---images/n01592084---images/n01601694---images/n01608432---images/n01614925---images/n01616318---images/n01622779---images/n01629819---images/n01630670---images/n01631663---images/n01632458---images/n01632777---images/n01641577---images/n01644373---images/n01644900---images/n01664065---images/n01665541---images/n01667114' width='100%' optional='true'></param>
+            <param name='path_to_sing' label='Absolute path to singularity container' help='Path to the singularity container in the worker machine' type='text' value='/mnt/vcinity_nfs_aws/opt/tensorflow/tensorflow_latest-gpu-jupyter.sif' width='52%' optional='true'></param>
+        </when>
+        <when value="direct_nfs">
+            <param name='mount_ip' label='NFS IP address' type='text' value='40.71.67.138' width='52%' optional='true'></param>
+            <param name='pw_mount_dir' label='Absolute path to PW mounted directory' type='text' value='/pw/storage/direct_nfs_azure/' width='52%' optional='true'></param>
+            <param name='worker_mount_dir' label='Absolute path to worker mounted directory' type='text' value='/mnt/direct_nfs_azure/' width='52%' optional='true'></param>
+            <param name='imgdirs' label='Relative path to image directories' type='text' help='Relative from the mounted directory. Separate multiple paths using ---' value='images/n01440764---images/n01443537---images/n01443537---images/n01484850---images/n01491361---images/n01494475---images/n01496331---images/n01498041---images/n01514668---images/n01514859---images/n01518878---images/n01530575---images/n01531178---images/n01532829---images/n01534433---images/n01537544---images/n01558993---images/n01560419---images/n01580077---images/n01582220---images/n01592084---images/n01601694---images/n01608432---images/n01614925---images/n01616318---images/n01622779---images/n01629819---images/n01630670---images/n01631663---images/n01632458---images/n01632777---images/n01641577---images/n01644373---images/n01644900---images/n01664065---images/n01665541---images/n01667114' width='100%' optional='true'></param>
+            <param name='path_to_sing' label='Absolute path to singularity container' help='Path to the singularity container in the worker machine' type='text' value='/mnt/direct_nfs_azure/opt/tensorflow/tensorflow_latest-gpu-jupyter.sif' width='52%' optional='true'></param>
+        </when>
+        <when value="gcp_bucket">
+            <param name='bucket_name' label='Bucket name' type='text' value='demoworkflows' width='52%' optional='true'></param>
+            <param name='pw_mount_dir' label='Absolute path to PW mounted directory' type='text' value='/pw/storage/demoworkflows_bucket/' width='52%' optional='true'></param>
+            <param name='worker_mount_dir' label='Absolute path to worker mounted directory' type='text' value='/mnt/demoworkflows_bucket/' width='52%' optional='true'></param>
+            <param name='imgdirs' label='Relative path to image directories' type='text' help='Relative from the mounted directory. Separate multiple paths using ---' value='tf_object_detection/images/n01440764---tf_object_detection/images/n01443537---tf_object_detection/images/n01443537---tf_object_detection/images/n01484850---tf_object_detection/images/n01491361---tf_object_detection/images/n01494475---tf_object_detection/images/n01496331---tf_object_detection/images/n01498041---tf_object_detection/images/n01514668---tf_object_detection/images/n01514859---tf_object_detection/images/n01518878---tf_object_detection/images/n01530575---tf_object_detection/images/n01531178---tf_object_detection/images/n01532829---tf_object_detection/images/n01534433---tf_object_detection/images/n01537544---tf_object_detection/images/n01558993---tf_object_detection/images/n01560419---tf_object_detection/images/n01580077---tf_object_detection/images/n01582220---tf_object_detection/images/n01592084---tf_object_detection/images/n01601694---tf_object_detection/images/n01608432---tf_object_detection/images/n01614925---tf_object_detection/images/n01616318---tf_object_detection/images/n01622779---tf_object_detection/images/n01629819---tf_object_detection/images/n01630670---tf_object_detection/images/n01631663---tf_object_detection/images/n01632458---tf_object_detection/images/n01632777---tf_object_detection/images/n01641577---tf_object_detection/images/n01644373---tf_object_detection/images/n01644900---tf_object_detection/images/n01664065---tf_object_detection/images/n01665541---tf_object_detection/images/n01667114' width='100%' optional='true'></param>
+            <param name='path_to_sing' label='Absolute path to singularity container' help='Path to the singularity container in the worker machine' type='text' value='/mnt/demoworkflows_bucket/tf_object_detection/opt/tensorflow/tensorflow_latest-gpu-jupyter.sif' width='52%' optional='true'></param>
+        </when>
+    </conditional>
+  </inputs>
+  <outputs>
+  </outputs>
+</tool>
