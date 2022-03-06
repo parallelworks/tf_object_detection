@@ -2,6 +2,8 @@
 
 The official TensorFlow [object detection tutorial](https://www.tensorflow.org/hub/tutorials/object_detection) is adapted in this workflow to run inferrence (object detection and classification) in a data set of images sorted by directories. The [model](https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1) is pretrained and downloaded from TensorFlow hub.
 
+### Image preprocessing
+It is useful to control image size in this workflow so that we can benchmark different storage systems.  There are two approaches: we can keep the images as compressed `.JPEG` (which have a large range of differrent file sizes, typically max/min = 35 or even as high as 4000) or we can convert the images to uncompressed `.bmp` which forces image size into a very narrow range (<1%). Image preprocessing scripts are in `./preproc`.
 
 ### Image processing
 Every worker processes the JPEG images under a given directory of the list specified in the input form, where each member is separated by three dashes (`---`). The images are edited to highlight the identified objects with frames and labels and then saved back to an output directory. The path of the output directory is the same as the path to the input directory with an appended `-out` string. For example:
