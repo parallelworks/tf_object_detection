@@ -20,7 +20,7 @@
         value='parsl-1.2'
     ></param> 
     <section name='inputs' type='section' title='Inputs' expanded='true'>
-          <param 
+      <param 
         name='transfer_input_data' 
         type='boolean' 
         truevalue='Yes' 
@@ -28,12 +28,6 @@
         checked='True'
         label='Transfer input images and singularity container?' 
         help='If yes is selected, the job transfers the data to specified directory'
-      ></param>
-      <param 
-        name='data_directory' 
-        label='Data Directory' 
-        type='text' 
-        value='__WORKDIR__/tf_object_detection'
       ></param>
     </section>
     <section name='pwrl_train' type='section' title='Executor' expanded='true'>
@@ -43,6 +37,21 @@
         label='Resource' 
         hideUserWorkspace='true' 
         help='Resource to host the service'
+      ></param>
+      <param 
+        name='data_directory' 
+        label='Data Directory' 
+        type='text' 
+        value='__WORKDIR__/tf_object_detection'
+      ></param>
+      <param 
+        name='directories_to_process' 
+        label='Number of image directories to process' 
+        type='integer' 
+        min="1" 
+        max="36" 
+        help='Each directory contains 150M of images with sizes between 1M and 5M. Each directory is processed in parallel' 
+        value='1' 
       ></param>
       <param 
         name='nports' 

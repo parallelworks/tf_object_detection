@@ -1,69 +1,83 @@
 import json
-import traceback, sys
+import logging
+import traceback
+import sys
 
 import parsl
-print(parsl.__version__, flush = True)
-
 import parsl_utils
 from parsl_utils.config import config, form_inputs, executor_dict
 from parsl_utils.data_provider import PWFile
-
 from workflow_apps import *
 
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+stream_handler = logging.StreamHandler(sys.stdout)
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+
 if __name__ == '__main__':
-    print('Loading Parsl Config', flush = True)
+    logger.info('Parsl Version: %s', parsl.__version__)
+    
+    logger.info('Loading Parsl Config')
     parsl.load(config)
     
-    pytorch_inputs = {
-        "model_path": './vae_model.pth',
-        "latent_size": int(form_inputs['pytorch']['latent_size']),
-        "num_epochs": int(form_inputs['pytorch']['num_epochs']),
-        "learning_rate": float(form_inputs['pytorch']['learning_rate']),
-        "num_digits": int(form_inputs['pytorch']['num_digits']),
-        "gen_data_dir": './generated_data/'
-    }
+    if form_inputs['inputs']['transfer_input_data']:
+        logger.info('Transferring input data from GCP bucket to %s', form_inputs['train']['data_directory'])
+
+        # File with the credentials to read input data from a GCP bucket
+        bucket_credentials = PWFile(
+            url = "./bucket-credentials",
+            local_path = "./bucket-credentials"
+        )
+
+        transfer_input_data_fut = transfer_input_data(
+            form_inputs['train']['data_directory'],
+            inputs = [bucket_credentials]
+        )
+    else:
+        transfer_input_data_fut = None
     
-    # Transfer files
-    model_file = PWFile(
-        url = pytorch_inputs['model_path'],
-        local_path = pytorch_inputs['model_path']
+    process_images_futs = [] 
+    for i in range(int(form_inputs['train']['directories_to_process'])):
+        logger.info(
+            'Processing images in directory %s', 
+            os.path.join(form_inputs['train']['data_directory'], 'selected-images/JPEG-1M-5M', str(i))
+        )
+
+        tf_code = PWFile(
+            url = "./tf_object_detection/",
+            local_path = "./tf_object_detection/"
+        )
+
+        process_images_fut = process_images(
+            form_inputs['train']['data_directory'],
+            i,
+            stdout = f'process_images_{i}.out', 
+            stderr = f'process_images_{i}.err',
+            inputs = [tf_code, transfer_input_data_fut]
+        )
+
+        process_images_futs.append(process_images_fut)
+
+    logger.info('Running design explorer')
+
+    dex_fut = merge_dex_results(
+        form_inputs['train']['data_directory'],
+        int(form_inputs['train']['directories_to_process']),
+        form_inputs['train']['resource']['name'],
+        inputs = process_images_futs,
+        outputs = [
+            PWFile(
+                url = "./dex.csv",
+                local_path = "./dex.csv"
+            ),
+            PWFile(
+                url = "./dex.html",
+                local_path = "./dex.html"
+            )
+        ]
     )
 
-    pytorch_dir = PWFile(
-        url = './pytorch/',
-        local_path = './pytorch/'
-    )
-
-    pytorch_inputs_json = PWFile(
-        url = "./pytorch_inputs.json",
-        local_path = "./pytorch_inputs.json"
-    )
-    
-    with open(pytorch_inputs_json.local_path, 'w') as file:
-        json.dump(pytorch_inputs, file, indent=4)
-
-    generated_data = PWFile(
-        url = pytorch_inputs['gen_data_dir'],
-        local_path = pytorch_inputs['gen_data_dir']
-    )
-
-    # Run workflow:
-    print('\n\nTraining model', flush = True)
-    train_fut = train(
-        executor_dict['train']['load_pytorch'],
-        inputs = [ pytorch_dir, pytorch_inputs_json ],
-        outputs = [ model_file ]
-    )
-    train_fut.result()
-    
-    print('\n\nGenerating data', flush = True)
-    generate_data_fut = generate_data(
-        executor_dict['inference']['load_pytorch'],
-        inputs = [ pytorch_dir, pytorch_inputs_json, model_file, train_fut],
-        outputs = [ generated_data ]
-    )
-
-    generate_data_fut.result()
-            
-    # Design Explorer:
-    prepare_design_explorer()
+    dex_fut.result()
