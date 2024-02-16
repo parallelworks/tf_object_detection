@@ -9,3 +9,6 @@ source /pw/kerberos/source.env
 
 # Cant run a scripts inside parsl_utils directly
 bash parsl_utils/main.sh
+
+echo; echo; echo "DATA TRANSFER TIME MEASUREMENTS"
+cat data-transfer-time-measurements.csv

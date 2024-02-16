@@ -61,6 +61,7 @@ if __name__ == '__main__':
 
         process_images_futs.append(process_images_fut)
 
+
     logger.info('Launching task to generate design explorer files')
 
     dex_fut = merge_dex_results(
@@ -80,4 +81,23 @@ if __name__ == '__main__':
         ]
     )
 
+
+    logger.info('Launching task to merge data transfer time measurements')
+
+    merge_data_transfer_time_measurements_fut = merge_data_transfer_time_measurements(
+        form_inputs['train']['data_directory'],
+        int(form_inputs['train']['directories_to_process']),
+        inputs = process_images_futs,
+        outputs = [
+            PWFile(
+                url = "./data-transfer-time-measurements.csv",
+                local_path = "./data-transfer-time-measurements.csv"
+            )
+        ]
+    )
+
+    merge_data_transfer_time_measurements_fut.result()
+
+
     dex_fut.result()
+

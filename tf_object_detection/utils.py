@@ -27,6 +27,7 @@ def display_image(image, path = ''):
     #fig = plt.figure(figsize=(15, 11))
     fig = plt.figure(figsize=(8 , 8 ))
     plt.grid(False)
+    plt.axis('off')  # Turn off axes ticks
     plt.imshow(image)
     if path:
         plt.savefig(path)

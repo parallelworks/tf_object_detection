@@ -6,6 +6,11 @@ from parsl.app.app import bash_app, python_app
 @bash_app
 def transfer_input_data(data_directory: str, inputs: Optional[List[str]] = None,  stdout:str = 'transfer_input_data.out', 
                         stderr: str = 'transfer_input_data.err') -> None:
+    """
+    Transfer images and tensorflow singularity container from a public GCP bucket.
+    The data is not transferred again if the directories with the images and the 
+    singularity container already exist
+    """
     import os
 
     return '''
@@ -39,10 +44,14 @@ def transfer_input_data(data_directory: str, inputs: Optional[List[str]] = None,
 @bash_app
 def process_images(data_directory: str, dir_number: int, inputs: Optional[List[str]] = None,
                    stdout: str = 'std.out', stderr: str = 'std.err') -> None:
+    
+    """
+    Process images to identify objects using this model https://www.tensorflow.org/hub/tutorials/object_detection
+    The image directories are assumed to be under <data_directory>/selected-images/JPEG-1M-5M/<i> where i is an
+    integer from 0 to (number_of_directories - 1)
+    """
     import os
     return '''
-        # FIXME: Need to copy singularity file
-        # fusemount not supported in singularity 3.5 --> Install 3.6+ and make new singularity container
         # Run TensorFlow
         singularity exec -B `pwd`:`pwd` -B {data_directory}:{data_directory} {path_to_sing} /usr/local/bin/python {pyscript} --imgdir {imgdir} --outdir {outdir} --start_time $(date  +"%s")
         chmod 777 {outdir} -R
@@ -54,10 +63,15 @@ def process_images(data_directory: str, dir_number: int, inputs: Optional[List[s
         outdir = os.path.join(data_directory, 'selected-images/JPEG-1M-5M', str(dir_number) + '-out')
     )
 
-# Assumes the file system is already mounted!
 @python_app
 def merge_dex_results(data_directory: str, directories_to_process: int, resource_name: str,
                       inputs: Optional[List[str]] = None, outputs: Optional[List[str]] = None) -> None:
+    
+    """
+    Create the final design explorer HTML and CSV files to display the results in the platform.
+    The images are not transferred back to the platform. The platform reads the images in the 
+    home directory of the resource moundted under /pw/clusters/<resource-name>
+    """
     
     import pandas as pd
     import os
@@ -97,3 +111,17 @@ def merge_dex_results(data_directory: str, directories_to_process: int, resource
         '''.format(csv = outputs[0].path)
     )
     dex_html.close()
+
+@python_app
+def merge_data_transfer_time_measurements(data_directory: str, directories_to_process: int,
+                      inputs: Optional[List[str]] = None, outputs: Optional[List[str]] = None) -> None:
+
+    """
+    Provides statistics with the data transfer times measurements 
+    """
+
+    import pandas as pd
+    import os
+    images_root_dir = os.path.join(data_directory, 'selected-images/JPEG-1M-5M')
+    measurements_df = pd.concat([ pd.read_csv(os.path.join(images_root_dir, f'{i}-out', 'measurements.csv')) for i in range(directories_to_process) ])
+    measurements_df.describe().to_csv(outputs[0].local_path)

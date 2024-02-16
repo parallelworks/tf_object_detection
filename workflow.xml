@@ -51,7 +51,7 @@
         min="1" 
         max="36" 
         help='Each directory contains 150M of images with sizes between 1M and 5M. Each directory is processed in parallel' 
-        value='1' 
+        value='2' 
       ></param>
       <param 
         name='nports' 
