@@ -86,12 +86,12 @@ def merge_dex_results(data_directory: str, directories_to_process: int, resource
         '''
         <html style="overflow-y:hidden;background:white"><a
             style="font-family:sans-serif;z-index:1000;position:absolute;top:15px;right:0px;margin-right:20px;font-style:italic;font-size:10px"
-            href="/preview/DesignExplorer/index.html?datafile={csv}&colorby=max_score"
+            href="/DesignExplorer/index.html?datafile={csv}&colorby=max_score"
             target="_blank">Open in New Window
         </a><iframe
             width="100%"
             height="100%"
-            src="/preview/DesignExplorer/index.html?datafile={csv}&colorby=max_score"
+            src="/DesignExplorer/index.html?datafile={csv}&colorby=max_score"
             frameborder="0">
         </iframe></html>
         '''.format(csv = outputs[0].path)
