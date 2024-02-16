@@ -1,76 +1,30 @@
 # TensorFlow Object Detection
+This workflow adapts the official [TensorFlow object detection tutorial](https://www.tensorflow.org/hub/tutorials/object_detection) to perform inference (object detection and classification) on a dataset of images organized in directories. The pretrained [model](https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1) is obtained from TensorFlow Hub.
 
-The official TensorFlow [object detection tutorial](https://www.tensorflow.org/hub/tutorials/object_detection) is adapted in this workflow to run inferrence (object detection and classification) in a data set of images sorted by directories. The [model](https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1) is pretrained and downloaded from TensorFlow hub.
+The primary objective of this workflow is to measure and benchmark data transfer from a storage resource or local disk. The user specifies a data directory, from which the workflow reads the images, processes them, and writes them back to a different location within the same directory. The workflow records the time taken to read and write the images. Users can specify the path to the data directory to align with the mount directory of a storage resource attached to the cluster, such as Lustre, NFS, or cloud storage.
 
-### Image preprocessing
-It is useful to control image size in this workflow so that we can benchmark different storage systems.  There are two approaches: we can keep the images as compressed `.JPEG` (which have a large range of differrent file sizes, typically max/min = 35 or even as high as 4000) or we can convert the images to uncompressed `.bmp` which forces image size into a very narrow range (<1%). Image preprocessing scripts are in `./preproc`.
+### Image Preprocessing
+Images ranging from 1MB to 5MB in size are selected from the [ImageNet Object Localization Challenge dataset](https://www.kaggle.com/c/imagenet-object-localization-challenge/data) and stored across 36 directories, each containing approximately 150MB of data. This amounts to a total of 5GB of data. These images are stored in the GCP bucket `gs://pw-public-4w3i9l8o7n6g5e4r3b2u1c0k/tf_object_detection/selected-images/JPEG-1M-5M/<i>`, where i is an integer ranging from 0 to 35.
 
-### Image processing
-Every worker processes the JPEG images under a given directory of the list specified in the input form, where each member is separated by three dashes (`---`). The images are edited to highlight the identified objects with frames and labels and then saved back to an output directory. The path of the output directory is the same as the path to the input directory with an appended `-out` string. For example:
+### Image Processing
+The user specifies the number of directories to process. Each worker then processes the JPEG images from the corresponding directories, starting from 0 up to the selected number. The images are enhanced to highlight identified objects using frames and labels, and then saved to an output directory. The output directory path mirrors the input directory path, with a -out suffix appended. For example:
 1. Input directory: `/path/to/images/12345`
 2. Output directory: `/path/to/images/12345-out`
 
-### Time measurements:
-The workflow performs the following time measurements:
-1. **load-libs:** Time to load all the required libraries. These are loaded from a singularity file
-2. **load-data:** Time to load all the images into memory. These are loded one by one.
-3. **processing:** Time to process all the images. Images are processed one by one using multiple cores.
-4. **write-data:** Time to write the processed images to the output directory. Multiple images are saved in parallel using all the physical cores (vCPUs/2) available.
+### Data Transfer Time Masurements
+The workflow tracks the following time measurements:
+- **load-libs**: Time taken to load all required libraries from a Singularity file.
+- **load-data**: Time required to load all images into memory, processed individually.
+processing: Time spent processing all images. Images are processed individually using multiple cores.
+- **write-data**: Time taken to save processed images to the output directory. Multiple images are saved concurrently using all available physical cores (vCPUs/2).
 
-These measurements are taken by each worker and saved to the output directory `/path/to/images/12345-out/mesurements.csv`. When all the workers have completed their tasks the measurements are merged to compute statistics (min, max, average, std, ...). These statistics are saved in the job directory: `/pw/jobs/job-dir/measurements.csv`.
+Each worker records these measurements and saves them to the output directory `/path/to/images/12345-out/mesurements.csv`. Once all workers finish their tasks, the measurements are merged to calculate statistics (minimum, maximum, average, standard deviation, etc.). These statistics are stored in the job directory: `/pw/jobs/<workflow-name>/<job-number>/data-transfer-time-measurements.csv`.
 
 
-### Design explorer:
-Two metrics are extraced for each processed images:
+### Design Explorer
+Two metrics are extraced for each processed image:
 1. Number of identified objects per image (with more than a 10% score)
 2. Maximum score of the identified objects
 
-
-These scores and the corresponding paths to the input and output images are saved for each image in the output directory  `/path/to/images/12345-out/dex.csv`. When all the workers have completed their tasks these files are merged and saved in the job directory: `/pw/jobs/job-dir/dex.csv`. The corresponding HTML file is also created under this directory: `/pw/jobs/job-dir/dex.html`. Click on this file to open the design explorer parallel coordinate plot.
-
-
-
-### Data sources:
-
-Three data sources are supported:
-1. **Vcinity NFS:** NFS mount from AWS west
-2. **Direct NFS:** NFS mount from Azure east
-3. **GCP bucket:** gcsfuse from a multiregional bucket
-
-
-### Workflow defaults
-5GB of image were selected from the 400GB of in the [ImageNet dataset](https://www.kaggle.com/c/imagenet-object-localization-challenge/data). The full dataset is downloaded to the persistent disk imagenet-object-localization in GCP. The selected data is distributed along 37 directories with 1300 images each (48100 images in total). The average size of each directory and image is 0.14GB and 0.1M, respectively.
-
-The data was copied to the following locations:
-1. Vcinity NFS: `54.241.247.242/ultxvfs2/images`
-2. Direct NFS: `40.71.67.138/ultxvfs2/images`
-3. GCP bucket: `gs://demoworkflows/tf_object_detection/images`
-
-The singularity files was copied to the following locations:
-1. Vcinity NFS: `54.241.247.242/ultxvfs2/opt/tensorflow`
-2. Direct NFS: `40.71.67.138/ultxvfs2/opt/tensorflow`
-3. GCP bucket: `gs://demoworkflows/tf_object_detection/opt/tensorflow`
-
- To mount all the data sources in the user PW account run:
-`bash /pw/workflows/tf_object_detection/mount_defaults.sh`
-
-### Requirements:
-
-#### Software
-- [Singularity 3.6+](https://sylabs.io/guides/3.0/user-guide/installation.html)
-- Singularity definition file (singularity.txt in workflow directory). Run the command: `singularity build tensorflow_latest-gpu-jupyter-extra.sif singularity.txt`
-- `apt-get install nfs-common -y`
-- `apt-get install gcsfuse`
-
-The software is installed in GCP image `ubuntu1804-singularity363-nfs-gcsfuse-worker`
-
-
-#### Network:
-To use NFS the worker needs access to the internet through an IP address with access to the Vcinity server. This was implemented using a NAT-Gateway in the GCP region `us-west2` in pool gcpvcinity of the demoworkflows account in PW.
-
-
-#### PW account:
-The user needs to mount the data sources (NFS or GCSFUSE) in their account before running the workflow. Run:
-
-`bash /pw/workflows/tf_object_detection/mount_defaults.sh`
+These scores, along with the paths to the input and output images, are saved for each image in the output directory `/path/to/images/12345-out/dex.csv`. Once all workers complete their tasks, these files are merged and stored in the job directory: `/pw/jobs/<workflow-name>/<job-number>/dex.csv`. Additionally, an HTML file is generated in this directory: `/pw/jobs/<workflow-name>/<job-number>/dex.html`. **Click on this file to open the Design Explorer parallel coordinate plot.**
 

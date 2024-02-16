@@ -1,34 +1,141 @@
-<tool id='demoworkflows_julia_parallel_co' name='demoworkflows_julia_parallel_co'>
-  <command interpreter='parsl'>main.py</command>
+<tool id='NA' name='NA'>
+  <command interpreter='bash'>parsl_wrapper.sh</command>
   <inputs>
-        <conditional name="data_source_cond">
-            <param name='data_source' type='select' label='Select data source' width='50%_none' optional='false' multiple='false'>
-            <option value="vcinity_nfs" selected="true">Vcinity NFS</option>
-            <option value="direct_nfs">Direct NFS</option>
-            <option value="gcp_bucket">GCP bucket</option>
-        </param>
-        <when value="vcinity_nfs">
-            <param name='mount_ip' label='NFS IP address' type='text' value='54.241.247.242' width='52%' optional='true'></param>
-            <param name='pw_mount_dir' label='Absolute path to PW mounted directory' type='text' value='/pw/storage/vcinity_nfs_aws/' width='52%' optional='true'></param>
-            <param name='worker_mount_dir' label='Absolute path to worker mounted directory' type='text' value='/mnt/vcinity_nfs_aws/' width='52%' optional='true'></param>
-            <param name='imgdirs' label='Relative path to image directories' type='text' help='Relative from the mounted directory. Separate multiple paths using ---' value='images/n01440764---images/n01443537---images/n01443537---images/n01484850---images/n01491361---images/n01494475---images/n01496331---images/n01498041---images/n01514668---images/n01514859---images/n01518878---images/n01530575---images/n01531178---images/n01532829---images/n01534433---images/n01537544---images/n01558993---images/n01560419---images/n01580077---images/n01582220---images/n01592084---images/n01601694---images/n01608432---images/n01614925---images/n01616318---images/n01622779---images/n01629819---images/n01630670---images/n01631663---images/n01632458---images/n01632777---images/n01641577---images/n01644373---images/n01644900---images/n01664065---images/n01665541---images/n01667114' width='100%' optional='true'></param>
-            <param name='path_to_sing' label='Absolute path to singularity container' help='Path to the singularity container in the worker machine' type='text' value='/mnt/vcinity_nfs_aws/opt/tensorflow/tensorflow_latest-gpu-jupyter.sif' width='52%' optional='true'></param>
-        </when>
-        <when value="direct_nfs">
-            <param name='mount_ip' label='NFS IP address' type='text' value='40.71.67.138' width='52%' optional='true'></param>
-            <param name='pw_mount_dir' label='Absolute path to PW mounted directory' type='text' value='/pw/storage/direct_nfs_azure/' width='52%' optional='true'></param>
-            <param name='worker_mount_dir' label='Absolute path to worker mounted directory' type='text' value='/mnt/direct_nfs_azure/' width='52%' optional='true'></param>
-            <param name='imgdirs' label='Relative path to image directories' type='text' help='Relative from the mounted directory. Separate multiple paths using ---' value='images/n01440764---images/n01443537---images/n01443537---images/n01484850---images/n01491361---images/n01494475---images/n01496331---images/n01498041---images/n01514668---images/n01514859---images/n01518878---images/n01530575---images/n01531178---images/n01532829---images/n01534433---images/n01537544---images/n01558993---images/n01560419---images/n01580077---images/n01582220---images/n01592084---images/n01601694---images/n01608432---images/n01614925---images/n01616318---images/n01622779---images/n01629819---images/n01630670---images/n01631663---images/n01632458---images/n01632777---images/n01641577---images/n01644373---images/n01644900---images/n01664065---images/n01665541---images/n01667114' width='100%' optional='true'></param>
-            <param name='path_to_sing' label='Absolute path to singularity container' help='Path to the singularity container in the worker machine' type='text' value='/mnt/direct_nfs_azure/opt/tensorflow/tensorflow_latest-gpu-jupyter.sif' width='52%' optional='true'></param>
-        </when>
-        <when value="gcp_bucket">
-            <param name='bucket_name' label='Bucket name' type='text' value='demoworkflows' width='52%' optional='true'></param>
-            <param name='pw_mount_dir' label='Absolute path to PW mounted directory' type='text' value='/pw/storage/demoworkflows_bucket/' width='52%' optional='true'></param>
-            <param name='worker_mount_dir' label='Absolute path to worker mounted directory' type='text' value='/mnt/demoworkflows_bucket/' width='52%' optional='true'></param>
-            <param name='imgdirs' label='Relative path to image directories' type='text' help='Relative from the mounted directory. Separate multiple paths using ---' value='tf_object_detection/images/n01440764---tf_object_detection/images/n01443537---tf_object_detection/images/n01443537---tf_object_detection/images/n01484850---tf_object_detection/images/n01491361---tf_object_detection/images/n01494475---tf_object_detection/images/n01496331---tf_object_detection/images/n01498041---tf_object_detection/images/n01514668---tf_object_detection/images/n01514859---tf_object_detection/images/n01518878---tf_object_detection/images/n01530575---tf_object_detection/images/n01531178---tf_object_detection/images/n01532829---tf_object_detection/images/n01534433---tf_object_detection/images/n01537544---tf_object_detection/images/n01558993---tf_object_detection/images/n01560419---tf_object_detection/images/n01580077---tf_object_detection/images/n01582220---tf_object_detection/images/n01592084---tf_object_detection/images/n01601694---tf_object_detection/images/n01608432---tf_object_detection/images/n01614925---tf_object_detection/images/n01616318---tf_object_detection/images/n01622779---tf_object_detection/images/n01629819---tf_object_detection/images/n01630670---tf_object_detection/images/n01631663---tf_object_detection/images/n01632458---tf_object_detection/images/n01632777---tf_object_detection/images/n01641577---tf_object_detection/images/n01644373---tf_object_detection/images/n01644900---tf_object_detection/images/n01664065---tf_object_detection/images/n01665541---tf_object_detection/images/n01667114' width='100%' optional='true'></param>
-            <param name='path_to_sing' label='Absolute path to singularity container' help='Path to the singularity container in the worker machine' type='text' value='/mnt/demoworkflows_bucket/tf_object_detection/opt/tensorflow/tensorflow_latest-gpu-jupyter.sif' width='52%' optional='true'></param>
-        </when>
-    </conditional>
+    <param 
+        name='pw_conda_yaml' 
+        label='PW Conda YAML Definition File' 
+        type='hidden' 
+        value='./requirements/pw_conda.yaml'
+    ></param>
+    <param 
+        name='pw_conda_dir' 
+        label='PW Conda Directory' 
+        type='hidden' 
+        value='/pw/.miniconda3c'
+    ></param>
+    <param 
+        name='pw_conda_env' 
+        label='PW Conda Environment Name' 
+        type='hidden' 
+        value='parsl-1.2'
+    ></param> 
+    <section name='inputs' type='section' title='Inputs' expanded='true'>
+      <param 
+        name='transfer_input_data' 
+        type='boolean' 
+        truevalue='Yes' 
+        falsevalue='No' 
+        checked='True'
+        label='Transfer input images and singularity container?' 
+        help='If yes is selected, the job transfers the data to specified directory'
+      ></param>
+    </section>
+    <section name='pwrl_train' type='section' title='Executor' expanded='true'>
+      <param 
+        name='resource' 
+        type='computeResource' 
+        label='Resource' 
+        hideUserWorkspace='true' 
+        help='Resource to host the service'
+      ></param>
+      <param 
+        name='data_directory' 
+        label='Data Directory' 
+        type='text' 
+        value='__WORKDIR__/tf_object_detection'
+      ></param>
+      <param 
+        name='directories_to_process' 
+        label='Number of image directories to process' 
+        type='integer' 
+        min="1" 
+        max="36" 
+        help='Each directory contains 150M of images with sizes between 1M and 5M. Each directory is processed in parallel' 
+        value='2' 
+      ></param>
+      <param 
+        name='nports' 
+        label='Number of Ports to Reserve' 
+        type='hidden' 
+        value='2'
+      ></param>
+      <param 
+        name='worker_conda_yaml' 
+        label='Worker Conda YAML Definition File' 
+        type='hidden' 
+        value='./requirements/worker_conda.yaml'
+      ></param>
+      <param 
+        name='worker_conda_dir' 
+        label='Worker Conda Directory' 
+        type='hidden' 
+        value='__WORKDIR__/pw/.miniconda3c'
+      ></param>
+      <param 
+        name='worker_conda_env' 
+        label='Worker Conda Environment Name' 
+        type='hidden' 
+        value='parsl-1.2'
+      ></param>
+      <param 
+        name='cores_per_worker' 
+        label='Cores per Worker' 
+        type='integer' 
+        min="1" 
+        max="100" 
+        help='cores_per_worker parameter for the Parsl HighThroughputExecutor' 
+        value='1' 
+      ></param>
+      <param 
+        name='jobschedulertype' 
+        type='select' 
+        label='Select Controller, SLURM Partition or PBS Queue' 
+        help='Job will submitted using SSH, sbatch or qsub, respectively' 
+        multiple='false'>
+            <option value="CONTROLLER">Controller</option>
+            <option value="SLURM" selected="true">SLURM Partition</option>
+      </param>
+      <param 
+        name='_parsl_provider_partition' 
+        label='SLURM Partition' 
+        type='text' 
+        help='partition parameter for the Parsl SlurmProvider' 
+        value=''
+        depends_on='pwrl_train.jobschedulertype'
+        show_if='SLURM'
+      ></param>
+      <param 
+        name='_parsl_provider_nodes_per_block' 
+        label='Nodes per Block' 
+        type='integer' 
+        min="1" 
+        max="10" 
+        help='nodes_per_block parameter for the Parsl SlurmProvider'
+        value='1'
+        depends_on='pwrl_train.jobschedulertype'
+        show_if='SLURM'
+      ></param>
+      <param 
+        name='_parsl_provider_walltime' 
+        label='Walltime' 
+        type='text' 
+        help='walltime parameter for the Parsl SlurmProvider' 
+        value='01:00:00'
+        depends_on='pwrl_train.jobschedulertype'
+        show_if='SLURM'
+      ></param>
+      <param 
+        name='_parsl_provider_max_blocks' 
+        label='Max Blocks' 
+        type='integer' 
+        min="1" 
+        max="10" 
+        help='max_blocks parameter for the Parsl SlurmProvider' 
+        value='10'
+        depends_on='pwrl_train.jobschedulertype'
+        show_if='SLURM'
+      ></param>
+    </section>
   </inputs>
   <outputs>
   </outputs>
