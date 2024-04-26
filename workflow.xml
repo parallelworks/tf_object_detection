@@ -98,11 +98,12 @@
       <param 
         name='_parsl_provider_partition' 
         label='SLURM Partition' 
-        type='text' 
+        type='dynamicPartitionDropdown' 
+        resource='pwrl_train.resource'
         help='partition parameter for the Parsl SlurmProvider' 
-        value=''
         depends_on='pwrl_train.jobschedulertype'
         show_if='SLURM'
+        dependent='false'
       ></param>
       <param 
         name='_parsl_provider_nodes_per_block' 
